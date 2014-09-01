@@ -1,10 +1,10 @@
 from benchpy import benchmarked
+import yaml
+import time
 
 # example as a context
 for i in range(10):
     with benchmarked(name='waiting'):
-        n = 1000000
-        while n:
-            n -= 1
+        time.sleep(0.2)
 
-print(benchmarked.statistics())
+print(yaml.dump(benchmarked.statistics(), width=1000))

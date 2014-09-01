@@ -10,6 +10,6 @@ setup(
     download_url='https://github.com/arteymix/benchpy/releases',
     classifiers=['Development Status :: 2 - Pre-Alpha', 'Topic :: System :: Benchmark'],
     packages=['benchpy'],
-    requires=['numpy'],
+    requires=['numpy', 'yaml'],
     license='BSD',
 )

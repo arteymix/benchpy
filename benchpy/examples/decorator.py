@@ -1,4 +1,5 @@
 from benchpy import benchmarked
+import yaml
 
 # example as a decorator
 @benchmarked()
@@ -9,4 +10,4 @@ def factorial(n):
 
 factorial(100)
 
-print(benchmarked.statistics())
+print(yaml.dump(benchmarked.statistics(), width=1000))
