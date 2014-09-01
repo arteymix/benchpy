@@ -54,8 +54,12 @@ class benchmarked:
         return wrapper
 
     def __enter__(self):
+        if self.name is None:
+            raise RuntimeError('You must set the name parameter to identify the context.')
+
         if not self in self.results:
             self.results[self.group][self.name] = []
+
         self.begin = resource.getrusage(self.rusage)
 
     def __exit__(self, type, value, traceback):
