@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from distutils.core import setup
 
 setup(
     name='benchpy',
@@ -7,6 +7,6 @@ setup(
     author_email='guillaumepoiriermorency@gmail.com',
     description='Benchmark Python code',
     license='BSD',
-    packages=find_packages(),
+    packages=['benchpy'],
     requires=['numpy'],
 )
