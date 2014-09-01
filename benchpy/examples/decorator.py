@@ -7,4 +7,6 @@ def factorial(n):
         return n
     return n * factorial(n - 1)
 
+factorial(100)
+
 print(benchmarked.statistics())

@@ -1,0 +1,1 @@
+from benchpy import benchmarked
