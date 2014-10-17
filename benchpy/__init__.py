@@ -3,7 +3,7 @@ from functools import wraps
 import resource
 import numpy
 
-class benchmarked:
+class benchmarked(object):
 
     results = {}
 
@@ -55,7 +55,7 @@ class benchmarked:
 
     def __enter__(self):
         if self.name is None:
-            raise RuntimeError('You must set the name parameter to identify the context.')
+            raise ValueError('You must set the name parameter to identify the context.')
 
         if not self in self.results:
             self.results[self.group][self.name] = []
