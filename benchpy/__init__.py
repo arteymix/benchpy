@@ -1,7 +1,14 @@
 from functools import wraps
-
-import resource
 import numpy
+
+try:
+    raise ImportError
+    from resource import getrusage, RUSAGE_SELF
+except ImportError:
+    import time
+    RUSAGE_SELF = None
+    def getrusage(rusage=None):
+        return 0.0, time.time(), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
 
 class benchmarked(object):
 
@@ -22,7 +29,7 @@ class benchmarked(object):
                 }
         return results
 
-    def __init__(self, group=None, name=None, rusage=resource.RUSAGE_SELF):
+    def __init__(self, group=None, name=None, rusage=RUSAGE_SELF):
         self.group = group
         self.name = name
         self.rusage = rusage
@@ -41,13 +48,13 @@ class benchmarked(object):
             if self.name not in self.results[self.group]:
                 self.results[self.group][self.name] = []
 
-            self.begin = resource.getrusage(self.rusage)
+            self.begin = getrusage(self.rusage)
 
             # actual heavy processing...
             output = f(*args, **kwds)
 
             # save results
-            self.results[self.group][self.name].append(numpy.subtract(resource.getrusage(self.rusage), self.begin))
+            self.results[self.group][self.name].append(numpy.subtract(getrusage(self.rusage), self.begin))
 
             return output
 
@@ -60,7 +67,7 @@ class benchmarked(object):
         if not self in self.results:
             self.results[self.group][self.name] = []
 
-        self.begin = resource.getrusage(self.rusage)
+        self.begin = getrusage(self.rusage)
 
     def __exit__(self, type, value, traceback):
-        self.results[self.group][self.name].append(numpy.subtract(resource.getrusage(self.rusage), self.begin))
+        self.results[self.group][self.name].append(numpy.subtract(getrusage(self.rusage), self.begin))
