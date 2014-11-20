@@ -1,5 +1,6 @@
-from benchpy import benchmarked
 import yaml
+
+from benchpy import benchmarked
 
 @benchmarked(group='factorial')
 def factorial_ensemble(n):
@@ -27,4 +28,4 @@ for _ in range(1000):
     factorial_one_if(50)
     factorial_two_if(50)
 
-print(yaml.dump(benchmarked.statistics(), width=1000))
+print(yaml.dump(benchmarked.statistics(), width=float('inf')))

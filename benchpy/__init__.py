@@ -1,49 +1,67 @@
+"""
+benchpy is an utility for benchmarking Python code.
+
+It defines a decorator and a context manager to benchmark functions and snippets
+of code.
+
+Benchmarks results are grouped and named.
+
+@benchmarked(group='foo') # name is defaulted to 'foo'
+def foo():
+    pass
+
+with benchmarked(group='foo', name='bar'):
+    pass
+"""
 from functools import wraps
 import numpy
 
 try:
-    raise ImportError
     from resource import getrusage, RUSAGE_SELF
 except ImportError:
     import time
     RUSAGE_SELF = None
-    def getrusage(rusage=None):
-        return 0.0, time.time(), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+    def getrusage(rusage=RUSAGE_SELF):
+        """Simulate getrusage from resource module if it's not available"""
+        return [(time.time() if i == 1 else 0.0) for i in range(16)]
 
 class benchmarked(object):
-
+    """
+    Decorator and context manager for benchmarking functions and snippet of
+    code.
+    """
     results = {}
 
     @classmethod
     def statistics(cls):
+        """
+        Compute statistics (average, max, median, minimun and sum) from results.
+        """
         results = {}
         for group, functions in cls.results.items():
             results[group] = {}
-            for function, benchmark in cls.results[group].items():
-                results[group][str(function)] = {
-                    'avg': list(map(float, numpy.average(benchmark, axis=0))),
-                    'max': list(map(float, numpy.amax(benchmark, axis=0))),
-                    'med': list(map(float, numpy.median(benchmark, axis=0))),
-                    'min': list(map(float, numpy.amin(benchmark, axis=0))),
-                    'sum': list(map(float, numpy.sum(benchmark, axis=0)))
-                }
+            for function, benchmark in functions:
+                function = str(function)
+                results[group][function] = {}
+                for name, stat in {'avg': numpy.average, 'max': numpy.amax, 'med': numpy.median, 'min': numpy.amin, 'sum': numpy.sum}:
+                    results[group][function][name] = float(stat(benchmark, axis=0))
         return results
 
     def __init__(self, group=None, name=None, rusage=RUSAGE_SELF):
+        self.begin = None
         self.group = group
         self.name = name
         self.rusage = rusage
         if not group in self.results:
             self.results[group] = {}
 
-    def __call__(self, f):
-        """ 
-        Benchmark a function execution
-        """
-        @wraps(f)
+    def __call__(self, func):
+        """Benchmark a function execution"""
+        @wraps(func)
         def wrapper(*args, **kwds):
+            """Wraps the function to process a resource delta"""
             if self.name is None:
-                self.name = f.__name__
+                self.name = func.__name__
 
             if self.name not in self.results[self.group]:
                 self.results[self.group][self.name] = []
@@ -51,10 +69,12 @@ class benchmarked(object):
             self.begin = getrusage(self.rusage)
 
             # actual heavy processing...
-            output = f(*args, **kwds)
+            output = func(*args, **kwds)
+
+            delta = numpy.subtract(getrusage(self.rusage), self.begin)
 
             # save results
-            self.results[self.group][self.name].append(numpy.subtract(getrusage(self.rusage), self.begin))
+            self.results[self.group][self.name].append(delta)
 
             return output
 
@@ -69,5 +89,6 @@ class benchmarked(object):
 
         self.begin = getrusage(self.rusage)
 
-    def __exit__(self, type, value, traceback):
-        self.results[self.group][self.name].append(numpy.subtract(getrusage(self.rusage), self.begin))
+    def __exit__(self, typ, value, traceback):
+        delta = numpy.subtract(getrusage(self.rusage), self.begin)
+        self.results[self.group][self.name].append(delta)

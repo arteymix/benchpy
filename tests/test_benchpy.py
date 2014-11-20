@@ -6,19 +6,24 @@ class BenchmarkTestCase(unittest.TestCase):
 
     def test_decorator(self):
         @benchmarked()
-        def t():
+        def foobar():
             pass
 
-        for i in range(10):
-            t()
+        for _ in range(10):
+            foobar()
 
-        self.assertEquals(10, len(benchmarked.results[None]['t']))
+        self.assertEqual(10, len(benchmarked.results[None]['foobar']))
+
+        statistics = benchmarked.statistics()
+        self.assertIn(None, statistics)
+        self.assertIn('foobar', statistics[None])
+        self.assertIn('min', statistics[None]['t'])
 
     def test_context_manager(self):
         with benchmarked(name='test'):
             pass
 
-        self.assertEquals(1, len(benchmarked.results[None]['test']))
+        self.assertEqual(1, len(benchmarked.results[None]['test']))
 
     def test_context_manager_name_missing(self):
         with self.assertRaises(ValueError):
