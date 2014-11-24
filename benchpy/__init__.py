@@ -30,21 +30,23 @@ class benchmarked(object):
     Decorator and context manager for benchmarking functions and snippet of
     code.
     """
-    results = {}
+    _results = {}
 
     @classmethod
-    def statistics(cls):
+    def results(cls, function, group=None):
+        """Returns results for a function in a group"""
+        return numpy.array(cls._results[group][function])
+
+    @classmethod
+    def statistics(cls, function, group=None):
         """
-        Compute statistics (average, max, median, minimun and sum) from results.
+        Compute statistics (average, max, median, minimun and sum) from _results
+        into a numpy array.
         """
+        benchmark = cls.results(function, group)
         results = {}
-        for group, functions in cls.results.items():
-            results[group] = {}
-            for function, benchmark in functions:
-                function = str(function)
-                results[group][function] = {}
-                for name, stat in {'avg': numpy.average, 'max': numpy.amax, 'med': numpy.median, 'min': numpy.amin, 'sum': numpy.sum}:
-                    results[group][function][name] = float(stat(benchmark, axis=0))
+        for name, stat in {'avg': numpy.average, 'max': numpy.amax, 'med': numpy.median, 'min': numpy.amin, 'sum': numpy.sum}.items():
+            results[name] = stat(benchmark, axis=0)
         return results
 
     def __init__(self, group=None, name=None, rusage=RUSAGE_SELF):
@@ -52,8 +54,8 @@ class benchmarked(object):
         self.group = group
         self.name = name
         self.rusage = rusage
-        if not group in self.results:
-            self.results[group] = {}
+        if not group in self._results:
+            self._results[group] = {}
 
     def __call__(self, func):
         """Benchmark a function execution"""
@@ -63,18 +65,18 @@ class benchmarked(object):
             if self.name is None:
                 self.name = func.__name__
 
-            if self.name not in self.results[self.group]:
-                self.results[self.group][self.name] = []
+            if self.name not in self._results[self.group]:
+                self._results[self.group][self.name] = []
 
             self.begin = getrusage(self.rusage)
 
             # actual heavy processing...
             output = func(*args, **kwds)
 
-            delta = numpy.subtract(getrusage(self.rusage), self.begin)
+            delta = tuple(numpy.subtract(getrusage(self.rusage), self.begin))
 
             # save results
-            self.results[self.group][self.name].append(delta)
+            self._results[self.group][self.name].append(delta)
 
             return output
 
@@ -84,11 +86,12 @@ class benchmarked(object):
         if self.name is None:
             raise ValueError('You must set the name parameter to identify the context.')
 
-        if not self in self.results:
-            self.results[self.group][self.name] = []
+        if not self in self._results:
+            self._results[self.group][self.name] = []
 
         self.begin = getrusage(self.rusage)
 
     def __exit__(self, typ, value, traceback):
-        delta = numpy.subtract(getrusage(self.rusage), self.begin)
-        self.results[self.group][self.name].append(delta)
+        delta = tuple(numpy.subtract(getrusage(self.rusage), self.begin))
+        self._results[self.group][self.name].append(delta)
+
