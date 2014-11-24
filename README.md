@@ -1,6 +1,5 @@
 benchpy
 =======
-
 benchpy is a Python utility to benchmark code.
 
 Installation
@@ -32,24 +31,37 @@ with benchmarked(group='passing', name='passing in a context'):
     pass
 ```
 
-Then you can use the `statistics` function to get an overview of the results.
+Then you can use the `statistics` function to get an overview of the results of
+a given function.
 ```python
 from benchpy import benchmarked
 
-print(benchmarked.results)
-print(benchmarked.statistics())
+@benchmarked()
+def foobar():
+    pass
+
+print(benchmarked.results('foobar'))
+print(benchmarked.statistics('foobar'))
 ```
 
-Numpy will gratefully compute the following output:
+Results from `results` is stored as a numpy array:
 ```yaml
-group:
-  name:
-    # [system time, user time, ...]
-    max: [0.15900000000000003, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
-    sum: [0.15900000000000003, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
-    avg: [0.15900000000000003, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
-    min: [0.15900000000000003, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
-    med: [0.15900000000000003, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+[[0.15900000000000003, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+  [0.15900000000000003, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+  [0.15900000000000003, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]]
+```
+
+You can then apply any data treatment numpy provides, which is practical for
+plotting your results.
+
+The `statistics` function will compute simple statistics about your result set:
+```yaml
+# [user time, system time, ...]
+max: [0.15900000000000003, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+sum: [0.15900000000000003, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+avg: [0.15900000000000003, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+min: [0.15900000000000003, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
+med: [0.15900000000000003, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
 ```
 
 The fields for each calculation will match those of `resource.getrusage`:
