@@ -44,6 +44,9 @@ print(benchmarked.results('foobar'))
 print(benchmarked.statistics('foobar'))
 ```
 
+Examples covering basic usage are providen in the
+[examples folder](https://github.com/arteymix/benchpy/tree/master/examples).
+
 Results from `results` is stored as a numpy array:
 ```yaml
 [[0.15900000000000003, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
