@@ -29,6 +29,8 @@ class benchmarked(object):
     """
     Decorator and context manager for benchmarking functions and snippet of
     code.
+
+    Results are shared amongst instances in _results class attribute.
     """
     _results = {}
 
@@ -48,6 +50,8 @@ class benchmarked(object):
         for name, stat in {'avg': numpy.average, 'max': numpy.amax, 'med': numpy.median, 'min': numpy.amin, 'sum': numpy.sum}.items():
             results[name] = stat(benchmark, axis=0)
         return results
+
+    __slots__ = ['begin', 'group', 'name', 'rusage']
 
     def __init__(self, group=None, name=None, rusage=RUSAGE_SELF):
         self.begin = None
@@ -73,6 +77,7 @@ class benchmarked(object):
             # actual heavy processing...
             output = func(*args, **kwds)
 
+            # compute a resource usage delta
             delta = tuple(numpy.subtract(getrusage(self.rusage), self.begin))
 
             # save results
@@ -92,6 +97,8 @@ class benchmarked(object):
         self.begin = getrusage(self.rusage)
 
     def __exit__(self, typ, value, traceback):
+        # compute a resource usage delta
         delta = tuple(numpy.subtract(getrusage(self.rusage), self.begin))
-        self._results[self.group][self.name].append(delta)
 
+        # store results
+        self._results[self.group][self.name].append(delta)
