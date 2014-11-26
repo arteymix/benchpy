@@ -1,5 +1,3 @@
-import yaml
-
 from benchpy import benchmarked
 
 @benchmarked(group='factorial')
@@ -28,4 +26,6 @@ for _ in range(1000):
     factorial_one_if(50)
     factorial_two_if(50)
 
-print(yaml.dump(benchmarked.statistics(), width=float('inf')))
+for func in {'factorial_ensemble', 'factorial_one_if', 'factorial_two_if'}:
+    for stat, results in benchmarked.statistics(func, group='factorial').items():
+        print('{} for {}: {} seconds'.format(stat, func, results[1]))
