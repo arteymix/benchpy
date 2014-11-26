@@ -13,6 +13,11 @@ class BenchmarkTestCase(unittest.TestCase):
         for _ in range(10):
             foobar()
 
+        # ensure right internal typing
+        self.assertIsInstance(benchmarked._results[None]['foobar'], list)
+        self.assertIsInstance(benchmarked._results[None]['foobar'][0], tuple)
+        self.assertIsInstance(benchmarked._results[None]['foobar'][0][0], float)
+
         results = benchmarked.results('foobar')
         self.assertIsInstance(results, numpy.ndarray)
         self.assertEqual(10, len(results))
@@ -25,9 +30,12 @@ class BenchmarkTestCase(unittest.TestCase):
         with benchmarked(name='test'):
             pass
 
-        self.assertEqual(1, len(benchmarked.results('test')))
+        self.assertIsInstance(benchmarked._results[None]['test'], list)
+        self.assertIsInstance(benchmarked._results[None]['test'][0], tuple)
+
 
         results = benchmarked.results('test')
+        self.assertEqual(1, len(results))
         self.assertIsInstance(results, numpy.ndarray)
 
         statistics = benchmarked.statistics('test')

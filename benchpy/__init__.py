@@ -23,7 +23,7 @@ except ImportError:
     RUSAGE_SELF = None
     def getrusage(rusage=RUSAGE_SELF):
         """Simulate getrusage from resource module if it's not available"""
-        return [(time.time() if i == 1 else 0.0) for i in range(16)]
+        return [(time.time() if i in {0, 1} else 0.0) for i in range(16)]
 
 class benchmarked(object):
     """
