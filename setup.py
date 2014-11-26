@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='benchpy',
-    version='1.1.0',
+    version='1.1.1',
     author='Guillaume Poirier-Morency',
     author_email='guillaumepoiriermorency@gmail.com',
     url='https://github.com/arteymix/benchpy',
