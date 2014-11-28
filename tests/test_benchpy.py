@@ -1,7 +1,7 @@
 import numpy
 import unittest
 
-from benchpy import benchmarked
+from benchpy import benchmarked, getrusage, RUSAGE_SELF
 
 class BenchmarkTestCase(unittest.TestCase):
 
@@ -21,10 +21,12 @@ class BenchmarkTestCase(unittest.TestCase):
         results = benchmarked.results('foobar')
         self.assertIsInstance(results, numpy.ndarray)
         self.assertEqual(10, len(results))
+        self.assertEqual(len(getrusage(RUSAGE_SELF)), len(results[0]))
 
         statistics = benchmarked.statistics('foobar')
         self.assertIn('min', statistics)
         self.assertIsInstance(statistics['min'], numpy.ndarray)
+        self.assertEqual(len(getrusage(RUSAGE_SELF)), len(statistics['min']))
 
     def test_context_manager(self):
         with benchmarked(name='test'):

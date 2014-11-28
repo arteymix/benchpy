@@ -36,14 +36,17 @@ class benchmarked(object):
 
     @classmethod
     def results(cls, function, group=None):
-        """Returns results for a function in a group"""
+        """
+        Returns a numpy nparray representing the benchmark results of a function
+        in a group.
+        """
         return numpy.array(cls._results[group][function])
 
     @classmethod
     def statistics(cls, function, group=None):
         """
         Compute statistics (average, max, median, minimun and sum) from _results
-        into a numpy array.
+        into a dictionary of numpy array.
         """
         benchmark = cls.results(function, group)
         results = {}
@@ -63,15 +66,16 @@ class benchmarked(object):
 
     def __call__(self, func):
         """Benchmark a function execution"""
+        # use the function name
+        if self.name is None:
+            self.name = func.__name__
+
+        if self.name not in self._results[self.group]:
+            self._results[self.group][self.name] = []
+
         @wraps(func)
         def wrapper(*args, **kwds):
             """Wraps the function to process a resource delta"""
-            if self.name is None:
-                self.name = func.__name__
-
-            if self.name not in self._results[self.group]:
-                self._results[self.group][self.name] = []
-
             self.begin = getrusage(self.rusage)
 
             # actual heavy processing...
@@ -91,7 +95,7 @@ class benchmarked(object):
         if self.name is None:
             raise ValueError('You must set the name parameter to identify the context.')
 
-        if not self in self._results:
+        if self.name not in self._results:
             self._results[self.group][self.name] = []
 
         self.begin = getrusage(self.rusage)
